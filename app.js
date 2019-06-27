@@ -160,7 +160,7 @@ function createDownloadLink(blob)
 	au.src = url;
 	//save to disk link
 	link.href = url;
-	link.download = filename+".wav"; //download forces the browser to donwload the file using the  filename
+	link.download = filename+".mp3"; //download forces the browser to donwload the file using the  filename
 ///	link.innerHTML = "Save to disk";
 	//add the new audio element to li
 ///	li.appendChild(au);
