@@ -208,7 +208,7 @@ function createDownloadLink(blob)
 		  //console.log( document.getElementsByClassName("js-attachmentUpload")[0].nextSibling.form[30].value );
 		  
 		  var fd=new FormData();
-		  fd.append("audio",blob, filename+'.wav');
+		  fd.append("audio",blob, filename+'.mp3');
 		 
 		  //fd.append("attachment_hash", getParameterByName('hash', href) );
 		  //fd.append("attachment_hash_combined",'{"type":"post","context":{"thread_id":39},"hash":"'+getParameterByName('hash', href)+'"}' );
