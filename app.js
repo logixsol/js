@@ -213,7 +213,7 @@ function createDownloadLink(blob)
 		  //fd.append("attachment_hash", getParameterByName('hash', href) );
 		  //fd.append("attachment_hash_combined",'{"type":"post","context":{"thread_id":39},"hash":"'+getParameterByName('hash', href)+'"}' );
 		  //fd.append("_xfToken", token );
-		  
+		  //xhr.setRequestHeader('Content-Type', 'multipart/form-data');
 		  
 		  xhr.open("POST", XF.config.url.fullBase+'index.php?lgxupload' ,true);
 		  xhr.send(fd);

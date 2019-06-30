@@ -43,7 +43,8 @@ var Recorder = exports.Recorder = (function () {
 
         this.config = {
             bufferLen: 4096,
-            numChannels: 2,
+            //numChannels: 2,
+            numChannels: 1,
             mimeType: 'audio/wav'
         };
         this.recording = false;
@@ -111,23 +112,45 @@ var Recorder = exports.Recorder = (function () {
                 }
                 recLength += inputBuffer[0].length;
             }
+			
+			function exportWAV(type){
+				var buffers = [], desiredSamplingRate = 12000;
+				for (var channel = 0; channel < numChannels; channel++){
+					var buffer = mergeBuffers(recBuffers[channel], recLength);
+					buffer = interpolateArray(buffer, desiredSamplingRate, sampleRate);
+					buffers.push(buffer);
+				}
+				sampleRate = desiredSamplingRate;
+				if (numChannels === 2){
+					var interleaved = interleave(buffers[0], buffers[1]);
+				} else {
+					var interleaved = buffers[0];
+				}
+				var dataview = encodeWAV(interleaved);
+				var audioBlob = new Blob([dataview], { type: type });
+				//this.postMessage(audioBlob);
+				self.postMessage({ command: 'exportWAV', data: audioBlob });
+			}
 
-            function exportWAV(type) {
-                var buffers = [];
-                for (var channel = 0; channel < numChannels; channel++) {
-                    buffers.push(mergeBuffers(recBuffers[channel], recLength));
-                }
-                var interleaved = undefined;
-                if (numChannels === 2) {
-                    interleaved = interleave(buffers[0], buffers[1]);
-                } else {
-                    interleaved = buffers[0];
-                }
-                var dataview = encodeWAV(interleaved);
-                var audioBlob = new Blob([dataview], { type: type });
-
-                self.postMessage({ command: 'exportWAV', data: audioBlob });
-            }
+			function interpolateArray(data, newSampleRate, oldSampleRate) {
+				var fitCount = Math.round(data.length*(newSampleRate/oldSampleRate));
+				var newData = new Array();
+				var springFactor = new Number((data.length - 1) / (fitCount - 1));
+				newData[0] = data[0]; // for new allocation
+				for ( var i = 1; i < fitCount - 1; i++) {
+				var tmp = i * springFactor;
+				var before = new Number(Math.floor(tmp)).toFixed();
+				var after = new Number(Math.ceil(tmp)).toFixed();
+				var atPoint = tmp - before;
+				newData[i] = this.linearInterpolate(data[before], data[after], atPoint);
+				}
+				newData[fitCount - 1] = data[data.length - 1]; // for new allocation
+				return newData;
+			};
+			
+			function linearInterpolate(before, after, atPoint) {
+				return before + (after - before) * atPoint;
+			};
 
             function getBuffer() {
                 var buffers = [];
@@ -188,6 +211,7 @@ var Recorder = exports.Recorder = (function () {
             }
 
             function encodeWAV(samples) {
+				
                 var buffer = new ArrayBuffer(44 + samples.length * 2);
                 var view = new DataView(buffer);
 
